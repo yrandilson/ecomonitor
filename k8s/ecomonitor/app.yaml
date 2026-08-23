@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecomonitor
+  namespace: ecomonitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecomonitor
+  template:
+    metadata:
+      labels:
+        app: ecomonitor
+    spec:
+      containers:
+        - name: ecomonitor
+          image: docker.io/library/ecomonitor:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: ecomonitor-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecomonitor
+  namespace: ecomonitor
+spec:
+  selector:
+    app: ecomonitor
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: ClusterIP

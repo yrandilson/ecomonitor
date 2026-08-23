@@ -305,6 +305,7 @@ export function registerLocalAuthRoutes(app: Express) {
       res.status(500).json({ error: 'Erro ao resetar senha' });
     }
   });
+}
 
 /**
  * Middleware para validar token JWT em requisições protegidas
