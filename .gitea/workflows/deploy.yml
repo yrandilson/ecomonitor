@@ -1,0 +1,32 @@
+name: Deploy EcoMonitor
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Build da imagem Docker
+        run: docker build -t ecomonitor:v1 .
+
+      - name: Exporta imagem pra tar
+        run: docker save ecomonitor:v1 -o /tmp/ecomonitor-v1.tar
+
+      - name: Importa no containerd do k3s
+        run: sudo k3s ctr images import /tmp/ecomonitor-v1.tar
+
+      - name: Reinicia o Deployment
+        run: kubectl rollout restart deployment/ecomonitor -n ecomonitor
+
+      - name: Aguarda o rollout confirmar
+        run: kubectl rollout status deployment/ecomonitor -n ecomonitor --timeout=120s
+
+      - name: Limpa o arquivo temporário
+        if: always()
+        run: rm -f /tmp/ecomonitor-v1.tar
